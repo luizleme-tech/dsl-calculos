@@ -2,154 +2,18 @@
 
 <img src="./logo-dsl-calculos.png" alt="DSL Cálculos" width="350">
 
-# DSL de Cálculos Matemáticos e Físicos
+# 🧮 DSL de Cálculos Matemáticos
 
 </div>
 
-> Uma Domain-Specific Language (DSL) para definição, validação e execução de fórmulas matemáticas e físicas, construída com **Kotlin** e **ANTLR**.
+DSL para interpretação e execução de expressões matemáticas desenvolvida em **Kotlin** utilizando **ANTLR 4**.
 
-## 📌 Sobre o projeto
-
-Este projeto tem como objetivo desenvolver uma **linguagem específica de domínio para cálculos**, permitindo representar fórmulas matemáticas e físicas através de uma sintaxe própria, independente da linguagem utilizada pela aplicação cliente.
-
-A proposta vai além de uma calculadora convencional.
-
-Em vez de implementar cada cálculo diretamente no código da aplicação, o projeto cria uma linguagem capaz de:
-
-* representar fórmulas;
-* interpretar expressões;
-* validar sintaxe e semântica;
-* construir uma Abstract Syntax Tree (AST);
-* resolver variáveis e constantes;
-* executar cálculos;
-* retornar resultados estruturados;
-* permitir a criação de novas fórmulas sem alterar o núcleo do motor.
-
-O projeto também funciona como estudo prático de:
-
-* construção de linguagens;
-* compiladores e interpretadores;
-* análise léxica;
-* análise sintática;
-* gramáticas formais;
-* AST;
-* validação semântica;
-* arquitetura de software;
-* Domain-Specific Languages.
-
----
-
-# 🎯 Objetivo
-
-Construir um **motor genérico de cálculos baseado em DSL** capaz de receber expressões matemáticas ou físicas, interpretar sua estrutura e executá-las utilizando valores fornecidos em tempo de execução.
-
-Exemplo simples:
+O projeto implementa um motor de expressões matemáticas para estudar, na prática, a construção de uma linguagem:
 
 ```text
-resultado = (a + b) * c
-```
-
-Com:
-
-```text
-a = 10
-b = 5
-c = 2
-```
-
-Resultado:
-
-```text
-resultado = 30
-```
-
-Entretanto, o objetivo do projeto é evoluir para fórmulas significativamente mais complexas.
-
-Por exemplo:
-
-```text
-delta = b^2 - 4 * a * c
-x1 = (-b + sqrt(delta)) / (2 * a)
-x2 = (-b - sqrt(delta)) / (2 * a)
-```
-
-Ou fórmulas físicas:
-
-```text
-velocidadeMedia = distancia / tempo
-```
-
-```text
-forca = massa * aceleracao
-```
-
-```text
-energiaCinetica = (massa * velocidade^2) / 2
-```
-
-```text
-energiaPotencial = massa * gravidade * altura
-```
-
-A DSL deverá permitir que novas fórmulas sejam adicionadas progressivamente sem transformar o motor em um conjunto de implementações específicas para cada cálculo.
-
----
-
-# 🧠 Conceito central
-
-O fluxo principal da DSL será:
-
-```text
-             Fórmula
-                │
-                ▼
-        ┌───────────────┐
-        │     Lexer     │
-        │     ANTLR     │
-        └───────┬───────┘
-                │
-              Tokens
-                │
-                ▼
-        ┌───────────────┐
-        │    Parser     │
-        │     ANTLR     │
-        └───────┬───────┘
-                │
-          Parse Tree
-                │
-                ▼
-        ┌───────────────┐
-        │  AST Builder  │
-        └───────┬───────┘
-                │
-               AST
-                │
-                ▼
-        ┌───────────────┐
-        │   Validator   │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │ Calculation   │
-        │    Engine     │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │    Result     │
-        └───────────────┘
-```
-
-De forma resumida:
-
-```text
-Formula
+Fórmula
    ↓
 Lexer
-   ↓
-Tokens
    ↓
 Parser
    ↓
@@ -157,1014 +21,567 @@ Parse Tree
    ↓
 AST
    ↓
-Semantic Validation
+Evaluator
    ↓
-Variable Resolution
-   ↓
-Calculation Engine
-   ↓
-Result
+Resultado
 ```
 
 ---
 
-# 🏗️ Arquitetura inicial
+## ✅ Funcionalidades implementadas
 
-Uma possível organização do projeto:
+Atualmente o Formula Engine possui suporte a:
+
+* números inteiros;
+* números decimais;
+* variáveis;
+* adição (`+`);
+* subtração (`-`);
+* multiplicação (`*`);
+* divisão (`/`);
+* potenciação (`^`);
+* operadores unários `+` e `-`;
+* parênteses;
+* precedência de operadores;
+* construção de AST;
+* avaliação das expressões;
+* tratamento de erros;
+* testes automatizados.
+
+Exemplos de expressões suportadas:
 
 ```text
-dsl-calculations/
-│
-├── README.md
-├── build.gradle.kts
-├── settings.gradle.kts
-│
-├── docs/
-│   ├── architecture/
-│   ├── grammar/
-│   ├── examples/
-│   └── decisions/
-│
-└── src/
-    ├── main/
-    │   ├── antlr/
-    │   │   └── Calculation.g4
-    │   │
-    │   └── kotlin/
-    │       └── dsl/
-    │           ├── lexer/
-    │           ├── parser/
-    │           ├── ast/
-    │           ├── validator/
-    │           ├── engine/
-    │           ├── context/
-    │           ├── function/
-    │           ├── result/
-    │           └── exception/
-    │
-    └── test/
-        └── kotlin/
-            └── dsl/
-                ├── parser/
-                ├── ast/
-                ├── validator/
-                └── engine/
+2 + 3
+10 - 4
+5 * 8
+20 / 4
+2 ^ 3
+2 + 3 * 4
+(2 + 3) * 4
+-10
+-x
+base * altura
 ```
-
-A estrutura deverá evoluir conforme novas necessidades forem descobertas durante o desenvolvimento.
 
 ---
 
-# 🔤 Gramática
+# 🏗️ Fluxo de execução
 
-A gramática será definida utilizando **ANTLR**.
+Uma expressão como:
 
-Exemplo inicial simplificado:
-
-```antlr
-grammar Calculation;
-
-expression
-    : expression '^' expression
-    | expression ('*' | '/') expression
-    | expression ('+' | '-') expression
-    | function
-    | NUMBER
-    | IDENTIFIER
-    | '(' expression ')'
-    ;
-
-function
-    : IDENTIFIER '(' expression ')'
-    ;
-
-NUMBER
-    : [0-9]+ ('.' [0-9]+)?
-    ;
-
-IDENTIFIER
-    : [a-zA-Z_][a-zA-Z0-9_]*
-    ;
-
-WS
-    : [ \t\r\n]+ -> skip
-    ;
+```text
+2 + 3 * 4
 ```
 
-Esta gramática é apenas o ponto de partida.
+passa pelo seguinte fluxo:
 
-Ela deverá evoluir para suportar:
+```text
+"2 + 3 * 4"
+       │
+       ▼
+┌─────────────┐
+│    Lexer    │
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│   Parser    │
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│ Parse Tree  │
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│     AST     │
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  Evaluator  │
+└──────┬──────┘
+       ▼
+      14
+```
 
-* precedência de operadores;
-* associatividade;
-* operadores unários;
-* potência;
-* funções matemáticas;
-* constantes;
-* múltiplas expressões;
-* atribuições;
-* tipos;
-* validações;
-* unidades físicas.
+A precedência matemática é preservada.
+
+Assim:
+
+```text
+2 + 3 * 4
+```
+
+é interpretado como:
+
+```text
+2 + (3 * 4)
+```
+
+resultando em:
+
+```text
+14
+```
+
+Enquanto:
+
+```text
+(2 + 3) * 4
+```
+
+resulta em:
+
+```text
+20
+```
 
 ---
 
 # 🌳 Abstract Syntax Tree — AST
 
-Após o parsing, a árvore gerada pelo ANTLR não será utilizada diretamente pelo domínio.
+Após o parsing realizado pelo ANTLR, a expressão é convertida para uma **Abstract Syntax Tree própria do domínio**.
 
-O projeto deverá possuir sua própria representação de AST.
-
-Exemplo conceitual:
+A raiz do modelo é:
 
 ```kotlin
 sealed interface Expression
 ```
 
-Implementações possíveis:
+A AST possui estruturas para representar:
 
 ```text
 Expression
 │
-├── LiteralExpression
-├── VariableExpression
+├── NumberLiteral
+├── VariableReference
 ├── BinaryExpression
-├── UnaryExpression
-├── FunctionExpression
-└── AssignmentExpression
+└── UnaryExpression
 ```
 
-Uma expressão como:
+As operações binárias atualmente representadas são:
 
 ```text
-(a + b) * c
+ADD
+SUBTRACT
+MULTIPLY
+DIVIDE
+POWER
 ```
 
-poderá resultar conceitualmente em:
-
-```text
-        *
-       / \
-      +   c
-     / \
-    a   b
-```
-
-Isso mantém o domínio independente das estruturas internas geradas pelo ANTLR.
+Essa separação evita que o restante do Formula Engine fique diretamente dependente da Parse Tree gerada pelo ANTLR.
 
 ---
 
-# 🔎 Validação
+# 🔢 Variáveis
 
-Antes da execução, as fórmulas deverão passar por validações.
-
-Existirão pelo menos dois níveis.
-
-## Validação sintática
-
-Responsabilidade principalmente do parser.
-
-Exemplo inválido:
-
-```text
-10 + * 20
-```
-
-## Validação semântica
-
-A expressão pode estar sintaticamente correta, mas semanticamente inválida.
+A DSL permite utilizar variáveis dentro das expressões.
 
 Exemplo:
 
 ```text
-resultado = massa * variavelInexistente
+base * altura
 ```
 
-Possíveis validações:
-
-* variável não definida;
-* função inexistente;
-* quantidade incorreta de argumentos;
-* tipos incompatíveis;
-* divisão por zero;
-* dependência circular;
-* constantes inválidas;
-* domínio inválido de função.
-
-Exemplo:
-
-```text
-sqrt(-10)
-```
-
-Dependendo das regras configuradas para o domínio numérico, essa expressão poderá gerar um erro semântico.
-
----
-
-# ⚙️ Motor de execução
-
-O `CalculationEngine` será responsável por avaliar a AST.
-
-Exemplo:
-
-```text
-massa = 10
-aceleracao = 5
-```
-
-Fórmula:
-
-```text
-forca = massa * aceleracao
-```
-
-Execução conceitual:
-
-```text
-Variable(massa)
-        ↓
-       10
-
-Variable(aceleracao)
-        ↓
-        5
-
-BinaryExpression(*)
-        ↓
-     10 * 5
-        ↓
-       50
-```
-
-Resultado:
-
-```json
-{
-  "variable": "forca",
-  "value": 50
-}
-```
-
----
-
-# 📦 Contexto de execução
-
-As fórmulas não deverão conhecer diretamente banco de dados, APIs ou interfaces externas.
-
-O motor receberá um contexto contendo os valores necessários para execução.
-
-Exemplo:
-
-```json
-{
-  "variables": {
-    "massa": 10,
-    "aceleracao": 9.81
-  }
-}
-```
-
-Fórmula:
-
-```text
-forca = massa * aceleracao
-```
-
-Resultado:
-
-```json
-{
-  "result": {
-    "forca": 98.1
-  }
-}
-```
-
-Isso permite que os valores tenham diferentes origens:
-
-```text
-HTTP Request
-Database
-Configuration
-External API
-Previous Calculation
-        │
-        ▼
-Execution Context
-        │
-        ▼
-Calculation Engine
-```
-
----
-
-# 🔗 Cálculos encadeados
-
-Um dos objetivos importantes da DSL é permitir cálculos dependentes de resultados anteriores.
-
-Exemplo:
-
-```text
-delta = b^2 - 4 * a * c
-x1 = (-b + sqrt(delta)) / (2 * a)
-x2 = (-b - sqrt(delta)) / (2 * a)
-```
-
-Nesse caso existe um grafo de dependências:
-
-```text
-a ─────┐
-b ─────┼────► delta
-c ─────┘        │
-                ├────► x1
-                │
-                └────► x2
-```
-
-O motor deverá identificar essas dependências e determinar a ordem correta de execução.
-
-Também deverá detectar dependências circulares.
-
-Exemplo inválido:
-
-```text
-a = b + 1
-b = a + 1
-```
-
----
-
-# 🧮 Operações matemáticas
-
-A primeira evolução da DSL deverá oferecer suporte aos operadores fundamentais:
-
-```text
-+
--
-*
-/
-%
-^
-```
-
-Também deverão ser suportadas funções matemáticas como:
-
-```text
-sqrt(x)
-abs(x)
-pow(x, y)
-min(x, y)
-max(x, y)
-round(x)
-```
-
-Posteriormente:
-
-```text
-sin(x)
-cos(x)
-tan(x)
-log(x)
-ln(x)
-exp(x)
-```
-
----
-
-# 🔢 Constantes
-
-A linguagem poderá possuir constantes matemáticas e físicas.
-
-Exemplos matemáticos:
-
-```text
-PI
-E
-```
-
-Exemplos físicos:
-
-```text
-GRAVITY
-SPEED_OF_LIGHT
-```
-
-Exemplo:
-
-```text
-circunferencia = 2 * PI * raio
-```
-
----
-
-# 🔬 Fórmulas físicas
-
-A arquitetura deverá permitir representar diferentes categorias de cálculos físicos.
-
-## Cinemática
-
-```text
-velocidadeMedia = distancia / tempo
-```
-
-```text
-movimentoUniforme = posicaoInicial + velocidade * tempo
-```
-
-## Dinâmica
-
-```text
-forca = massa * aceleracao
-```
-
-## Energia
-
-```text
-energiaCinetica = massa * velocidade^2 / 2
-```
-
-```text
-energiaPotencial = massa * gravidade * altura
-```
-
-## Eletricidade
-
-```text
-tensao = resistencia * corrente
-```
-
-## Densidade
-
-```text
-densidade = massa / volume
-```
-
-A intenção não é implementar cada equação como código Kotlin.
-
-As fórmulas deverão ser representadas, sempre que possível, **pela própria DSL**.
-
----
-
-# 📐 Unidades de medida
-
-Uma evolução importante do projeto será adicionar suporte a grandezas e unidades.
-
-Exemplo:
-
-```text
-massa = 10 kg
-aceleracao = 9.81 m/s^2
-
-forca = massa * aceleracao
-```
-
-Resultado esperado:
-
-```text
-98.1 N
-```
-
-Isso exigirá futuramente conceitos como:
-
-```text
-Value
-│
-├── NumericValue
-│
-└── Quantity
-     ├── value
-     ├── unit
-     └── dimension
-```
-
-O motor poderá validar operações dimensionalmente incompatíveis.
+Durante a avaliação, os valores das variáveis são fornecidos ao motor.
 
 Por exemplo:
 
 ```text
-10 kg + 20 m
+base = 10
+altura = 5
 ```
 
-deverá ser rejeitado.
+A expressão:
+
+```text
+base * altura
+```
+
+produz:
+
+```text
+50
+```
+
+A mesma fórmula pode, portanto, ser executada utilizando diferentes valores.
 
 ---
 
-# 📚 Biblioteca de fórmulas
+# ▶️ Executando o projeto
 
-No futuro, fórmulas poderão ser organizadas em bibliotecas.
+O projeto utiliza o **Gradle Wrapper**, portanto não é necessário possuir uma instalação global do Gradle.
 
-Exemplo:
+Clone o repositório:
 
-```text
-formulas/
-│
-├── mathematics/
-│   ├── arithmetic
-│   ├── algebra
-│   ├── geometry
-│   └── trigonometry
-│
-└── physics/
-    ├── mechanics
-    ├── kinematics
-    ├── dynamics
-    ├── thermodynamics
-    └── electricity
+```bash
+git clone https://github.com/luizleme-tech/dsl-calculos.git
 ```
 
-Isso permitirá reutilizar o mesmo motor para diferentes domínios.
+Entre no diretório do Formula Engine:
+
+```bash
+cd dsl-calculos/formula-engine/formula-engine
+```
+
+Em Linux ou macOS, utilize:
+
+```bash
+./gradlew
+```
+
+No Windows:
+
+```powershell
+gradlew.bat
+```
 
 ---
 
-# 🧩 Exemplo completo
+# 🚀 Executando os exemplos
 
-Entrada:
+O projeto possui exemplos executáveis que demonstram o funcionamento da DSL.
 
-```json
-{
-  "formula": "energiaCinetica = massa * velocidade^2 / 2",
-  "variables": {
-    "massa": 80,
-    "velocidade": 10
-  }
-}
+Os exemplos podem ser executados diretamente através do **Gradle Wrapper**.
+
+## Linux / macOS
+
+```bash
+./gradlew runExamples
 ```
 
-Processamento:
+## Windows
+
+```powershell
+gradlew.bat runExamples
+```
+
+A execução percorre os exemplos definidos no projeto e demonstra o fluxo completo:
 
 ```text
-JSON
- │
- ▼
-Formula
- │
- ▼
-ANTLR Lexer
- │
- ▼
-ANTLR Parser
- │
- ▼
-Parse Tree
- │
- ▼
-AST Builder
- │
- ▼
+Expressão
+    ↓
+Parser ANTLR
+    ↓
 AST
- │
- ▼
-Semantic Validator
- │
- ▼
-Variable Resolver
- │
- ▼
-Calculation Engine
- │
- ▼
-Result
+    ↓
+Evaluator
+    ↓
+Resultado
 ```
 
-Resultado:
+Por exemplo, uma expressão como:
 
-```json
-{
-  "formula": "energiaCinetica",
-  "value": 4000
-}
+```text
+2 + 3 * 4
+```
+
+deve produzir:
+
+```text
+14
+```
+
+Enquanto:
+
+```text
+(2 + 3) * 4
+```
+
+deve produzir:
+
+```text
+20
 ```
 
 ---
 
-# 🧱 Separação de responsabilidades
+# 🧪 Executando os testes
 
-## Grammar
+Para executar toda a suíte de testes:
 
-Define **como a linguagem pode ser escrita**.
+### Linux / macOS
 
-```text
-Calculation.g4
+```bash
+./gradlew test
 ```
 
-## Lexer
+### Windows
 
-Transforma caracteres em tokens.
-
-```text
-"10 + massa"
+```powershell
+gradlew.bat test
 ```
 
-torna-se conceitualmente:
-
-```text
-NUMBER(10)
-PLUS
-IDENTIFIER(massa)
-```
-
-## Parser
-
-Valida a estrutura sintática e produz a Parse Tree.
-
-## AST Builder
-
-Converte estruturas do ANTLR para objetos pertencentes ao domínio da DSL.
-
-## Validator
-
-Executa validações semânticas.
-
-## Context
-
-Mantém variáveis, constantes e demais valores necessários para uma execução.
-
-## Engine
-
-Percorre a AST e realiza os cálculos.
-
-## Function Registry
-
-Mantém as funções disponíveis na linguagem.
-
-Exemplo:
-
-```text
-sqrt
-sin
-cos
-pow
-abs
-```
-
-## Result
-
-Representa o resultado da execução de forma independente da interface externa.
+O Gradle irá compilar o projeto e executar os testes automatizados.
 
 ---
 
-# 🏛️ Princípios arquiteturais
+## Executando um teste específico
 
-O projeto seguirá alguns princípios importantes.
+Também é possível executar apenas uma classe de testes:
 
-### Independência do ANTLR
+```bash
+./gradlew test --tests "NomeDaClasseDeTeste"
+```
 
-ANTLR será utilizado para parsing, mas não deverá contaminar todo o domínio.
+Ou um teste específico:
+
+```bash
+./gradlew test --tests "NomeDaClasseDeTeste.nomeDoTeste"
+```
+
+Isso é útil durante o desenvolvimento de novas funcionalidades da linguagem.
+
+---
+
+# ⚠️ Testes de erro
+
+A DSL também possui cenários destinados a verificar expressões inválidas.
+
+Por exemplo:
+
+```text
+10 +
+```
+
+```text
+* 5
+```
+
+```text
+(10 + 5
+```
+
+O objetivo é garantir que uma fórmula inválida não seja silenciosamente interpretada como uma expressão válida.
+
+O motor deve produzir o erro esperado para cada cenário.
+
+Isso permite testar diferentes categorias de problema:
+
+```text
+Fórmula
+   │
+   ├── válida ──────────────► Resultado
+   │
+   └── inválida
+          │
+          ▼
+       Exceção
+```
+
+---
+
+# 🧹 Limpando o projeto
+
+Para remover arquivos gerados pelo build:
+
+### Linux / macOS
+
+```bash
+./gradlew clean
+```
+
+### Windows
+
+```powershell
+gradlew.bat clean
+```
+
+---
+
+# 🔨 Build completo
+
+Para limpar, compilar e executar os testes:
+
+### Linux / macOS
+
+```bash
+./gradlew clean build
+```
+
+### Windows
+
+```powershell
+gradlew.bat clean build
+```
+
+O fluxo executado pelo Gradle será aproximadamente:
 
 ```text
 ANTLR
-  │
-  ▼
-Adapter / AST Builder
-  │
-  ▼
-Domain AST
-```
-
-### Motor independente de transporte
-
-O motor não deverá depender de:
-
-```text
-REST
-HTTP
-JSON
-Database
-Angular
-Spring
-```
-
-Essas tecnologias poderão consumir o motor, mas não definir seu funcionamento.
-
-### Fórmulas como dados
-
-Sempre que possível:
-
-```text
-Formula != Kotlin Code
-```
-
-A fórmula deve ser armazenável, versionável, validável e executável pela DSL.
-
-### Extensibilidade
-
-Adicionar uma nova fórmula idealmente não deverá exigir alterações no núcleo do motor.
-
----
-
-# 🧪 Estratégia de testes
-
-O projeto deverá possuir testes em diferentes níveis.
-
-## Grammar Tests
-
-```text
-"1 + 2"
-"a * b"
-"(a + b) * c"
-```
-
-## Parser Tests
-
-Verificar se expressões válidas e inválidas são reconhecidas corretamente.
-
-## AST Tests
-
-```text
-1 + 2 * 3
-```
-
-deve respeitar precedência:
-
-```text
-    +
-   / \
-  1   *
-     / \
-    2   3
-```
-
-## Validator Tests
-
-Testar:
-
-* variáveis inexistentes;
-* funções inexistentes;
-* argumentos inválidos;
-* dependências circulares;
-* tipos incompatíveis.
-
-## Engine Tests
-
-```text
-2 + 2 = 4
-```
-
-```text
-2 + 3 * 4 = 14
-```
-
-```text
-(2 + 3) * 4 = 20
-```
-
-## Formula Tests
-
-Exemplo:
-
-```text
-massa = 80
-velocidade = 10
-
-energiaCinetica = massa * velocidade^2 / 2
-```
-
-Resultado:
-
-```text
-4000
+  ↓
+geração do Lexer/Parser
+  ↓
+compilação Kotlin
+  ↓
+compilação dos testes
+  ↓
+execução dos testes
+  ↓
+build
 ```
 
 ---
 
-# 🗺️ Roadmap
+# 📋 Comandos principais
 
-## Fase 1 — Calculadora básica
-
-* [ ] Criar projeto Kotlin
-* [ ] Configurar ANTLR
-* [ ] Criar gramática inicial
-* [ ] Implementar soma
-* [ ] Implementar subtração
-* [ ] Implementar multiplicação
-* [ ] Implementar divisão
-* [ ] Implementar parênteses
-* [ ] Implementar precedência
-
-## Fase 2 — AST
-
-* [ ] Criar modelo da AST
-* [ ] Criar AST Builder
-* [ ] Remover dependência direta da Parse Tree no domínio
-* [ ] Criar Visitor/Evaluator
-
-## Fase 3 — Variáveis
-
-* [ ] Implementar identificadores
-* [ ] Implementar atribuições
-* [ ] Criar Execution Context
-* [ ] Criar Variable Resolver
-* [ ] Suportar resultados intermediários
-
-## Fase 4 — Funções matemáticas
-
-* [ ] `sqrt`
-* [ ] `pow`
-* [ ] `abs`
-* [ ] `min`
-* [ ] `max`
-* [ ] `sin`
-* [ ] `cos`
-* [ ] `tan`
-* [ ] `log`
-
-## Fase 5 — Validação semântica
-
-* [ ] Variáveis inexistentes
-* [ ] Funções inexistentes
-* [ ] Quantidade de argumentos
-* [ ] Divisão por zero
-* [ ] Dependências circulares
-* [ ] Domínio das funções
-
-## Fase 6 — Fórmulas encadeadas
-
-* [ ] Criar grafo de dependências
-* [ ] Ordenação das fórmulas
-* [ ] Resultados intermediários
-* [ ] Detecção de ciclos
-
-## Fase 7 — Física
-
-* [ ] Constantes físicas
-* [ ] Grandezas
-* [ ] Unidades
-* [ ] Dimensões
-* [ ] Conversão de unidades
-* [ ] Validação dimensional
-
-## Fase 8 — Biblioteca de fórmulas
-
-* [ ] Matemática
-* [ ] Álgebra
-* [ ] Geometria
-* [ ] Trigonometria
-* [ ] Cinemática
-* [ ] Dinâmica
-* [ ] Energia
-* [ ] Eletricidade
-
-## Fase 9 — Persistência e API
-
-* [ ] Representação JSON das fórmulas
-* [ ] Versionamento
-* [ ] Persistência
-* [ ] API para validação
-* [ ] API para execução
+| Objetivo          | Linux / macOS           | Windows                   |
+| ----------------- | ----------------------- | ------------------------- |
+| Executar exemplos | `./gradlew runExamples` | `gradlew.bat runExamples` |
+| Executar testes   | `./gradlew test`        | `gradlew.bat test`        |
+| Build completo    | `./gradlew build`       | `gradlew.bat build`       |
+| Limpar projeto    | `./gradlew clean`       | `gradlew.bat clean`       |
+| Limpar + build    | `./gradlew clean build` | `gradlew.bat clean build` |
 
 ---
 
-# 🚀 Visão futura
+# 🗂️ Papel dos exemplos
 
-A arquitetura poderá evoluir para algo semelhante a:
+Os exemplos existentes no projeto têm uma função diferente dos testes automatizados.
+
+### Exemplos
+
+Servem para **visualizar o Formula Engine funcionando**:
 
 ```text
-             ┌─────────────────┐
-             │ Formula Editor  │
-             │     Angular     │
-             └────────┬────────┘
-                      │
-                     JSON
-                      │
-                      ▼
-             ┌─────────────────┐
-             │   Formula API   │
-             └────────┬────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │   DSL Compiler  │
-             │                 │
-             │ Lexer           │
-             │ Parser          │
-             │ AST Builder     │
-             │ Validator       │
-             └────────┬────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │ Calculation     │
-             │ Engine          │
-             └────────┬────────┘
-                      │
-             ┌────────┴────────┐
-             ▼                 ▼
-       Formula Store        Result
+./gradlew runExamples
 ```
 
-A interface poderá permitir futuramente a construção visual das fórmulas, enquanto o backend permanece responsável pela validação e execução.
+Eles permitem acompanhar:
+
+```text
+entrada → parsing → AST → avaliação → resultado
+```
+
+### Testes
+
+Servem para verificar automaticamente o comportamento esperado:
+
+```text
+./gradlew test
+```
+
+Eles validam:
+
+* operações matemáticas;
+* precedência;
+* parênteses;
+* operadores;
+* variáveis;
+* AST;
+* avaliação;
+* cenários inválidos;
+* comportamento esperado em erros.
+
+Dessa forma:
+
+```text
+             Formula Engine
+                   │
+         ┌─────────┴─────────┐
+         ▼                   ▼
+     Exemplos              Testes
+         │                   │
+ demonstração           validação
+         │                   │
+         ▼                   ▼
+ ./gradlew              ./gradlew
+ runExamples               test
+```
+
+---
+
+# 🚧 Próximas evoluções
+
+O Formula Engine está sendo desenvolvido incrementalmente.
+
+Entre as funcionalidades que poderão ser adicionadas futuramente estão:
+
+* funções matemáticas;
+* raiz quadrada;
+* constantes matemáticas;
+* geometria;
+* equações;
+* função quadrática;
+* trigonometria;
+* cálculos encadeados;
+* fórmulas físicas;
+* constantes físicas;
+* unidades de medida.
+
+Exemplos futuros poderão incluir:
+
+```text
+sqrt(x)
+```
+
+```text
+PI * raio ^ 2
+```
+
+```text
+sin(angulo)
+```
+
+```text
+(-b + sqrt(b^2 - 4*a*c)) / (2*a)
+```
+
+Essas funcionalidades somente devem ser consideradas suportadas quando estiverem implementadas e cobertas por testes.
+
+---
+
+# 🎓 Objetivo de estudo
+
+O projeto funciona como laboratório para estudar a construção de uma linguagem do início ao fim:
+
+```text
+Gramática
+   ↓
+ANTLR
+   ↓
+Lexer
+   ↓
+Parser
+   ↓
+Parse Tree
+   ↓
+AST
+   ↓
+Evaluator
+   ↓
+Resultado
+```
+
+Entre os conceitos explorados estão:
+
+* Domain-Specific Languages;
+* gramáticas formais;
+* ANTLR;
+* análise léxica;
+* análise sintática;
+* Parse Tree;
+* Abstract Syntax Tree;
+* Visitor;
+* interpretação;
+* precedência;
+* associatividade;
+* tratamento de erros;
+* testes de linguagens.
 
 ---
 
 # 🛠️ Tecnologias
 
-Inicialmente:
-
 * **Kotlin**
 * **ANTLR 4**
-* **Gradle Kotlin DSL**
-* **JUnit 5**
-* **Git**
-
-Possíveis tecnologias futuras:
-
-* Spring Boot
-* PostgreSQL
-* Angular
-* Docker
-* Testcontainers
-
-Essas tecnologias não fazem parte obrigatoriamente do núcleo da DSL.
+* **Gradle**
+* **JUnit**
 
 ---
 
-# 📖 Conceitos estudados
+# 👨‍💻 Autor
 
-Este projeto também será utilizado como laboratório para estudo de:
+**Luiz Leme**
 
-```text
-Compiler Design
-Domain-Specific Languages
-Formal Grammars
-Lexer
-Parser
-Parse Tree
-Abstract Syntax Tree
-Visitor Pattern
-Interpreter Pattern
-Semantic Analysis
-Symbol Tables
-Dependency Graphs
-Type Systems
-Dimensional Analysis
-Language Engineering
-Software Architecture
-```
+Projeto de estudo e desenvolvimento de uma DSL para cálculos matemáticos.
 
----
-
-# 📚 Referências de estudo
-
-O desenvolvimento será apoiado principalmente em literatura sobre construção de linguagens e DSLs.
-
-### Terence Parr
-
-**The Definitive ANTLR 4 Reference**
-
-Referência principal para ANTLR, gramáticas, parsers, listeners e visitors.
-
-### Terence Parr
-
-**Language Implementation Patterns**
-
-Aborda padrões utilizados na implementação de linguagens, interpretadores e tradutores.
-
-### Martin Fowler
-
-**Domain-Specific Languages**
-
-Referência importante para compreender DSLs internas e externas, parsers, modelos semânticos e estratégias de implementação.
-
----
-
-# 💡 Filosofia do projeto
-
-Este repositório não pretende apenas responder:
-
-> "Como calcular uma fórmula?"
-
-A pergunta principal é:
-
-> **"Como projetar uma linguagem capaz de representar, validar e executar diferentes tipos de cálculos?"**
-
-Por isso, o projeto começa pequeno:
-
-```text
-1 + 2
-```
-
-e deverá evoluir progressivamente para:
-
-```text
-DSL
- │
- ├── Grammar
- ├── Parser
- ├── AST
- ├── Semantic Model
- ├── Validation
- ├── Functions
- ├── Variables
- ├── Dependency Graph
- ├── Calculation Engine
- ├── Mathematical Formulas
- └── Physical Formulas
-```
-
-O objetivo final é possuir um **motor extensível de fórmulas matemáticas e físicas**, no qual a linguagem descreve **o que deve ser calculado**, enquanto o motor determina **como interpretar, validar e executar o cálculo**.
-
----
-
-## 📄 Licença
-
-Projeto desenvolvido inicialmente para fins de estudo, experimentação e evolução de conhecimentos em engenharia de software, construção de linguagens, compiladores, Kotlin e ANTLR.
+**Kotlin · ANTLR · DSL · AST · Compiladores · Interpretadores · Matemática**
