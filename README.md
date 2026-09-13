@@ -6,146 +6,496 @@
 
 </div>
 
-> Uma Domain-Specific Language (DSL) para definição, validação e execução de fórmulas matemáticas e físicas, construída com **Kotlin** e **ANTLR**.
+Uma **Domain-Specific Language (DSL)** para definição, validação e execução de fórmulas matemáticas e físicas, desenvolvida como projeto de estudo e experimentação em **Kotlin**, **ANTLR**, linguagens formais e arquitetura de software.
 
-## 📌 Sobre o projeto
+O objetivo do projeto é explorar como fórmulas podem ser representadas como uma linguagem própria, separando a **definição do cálculo** da **implementação do sistema responsável por executá-lo**.
 
-Este projeto tem como objetivo desenvolver uma **linguagem específica de domínio para cálculos**, permitindo representar fórmulas matemáticas e físicas através de uma sintaxe própria, independente da linguagem utilizada pela aplicação cliente.
+---
 
-A proposta vai além de uma calculadora convencional.
+## 📌 Visão geral
 
-Em vez de implementar cada cálculo diretamente no código da aplicação, o projeto cria uma linguagem capaz de:
+Em muitos sistemas, regras de cálculo acabam implementadas diretamente no código-fonte:
 
-* representar fórmulas;
-* interpretar expressões;
-* validar sintaxe e semântica;
-* construir uma Abstract Syntax Tree (AST);
-* resolver variáveis e constantes;
-* executar cálculos;
-* retornar resultados estruturados;
-* permitir a criação de novas fórmulas sem alterar o núcleo do motor.
+```text
+resultado = valor * taxa + adicional
+```
 
-O projeto também funciona como estudo prático de:
+Quando uma fórmula muda, normalmente é necessário alterar código, executar testes, gerar uma nova versão da aplicação e realizar um novo deploy.
 
-* construção de linguagens;
-* compiladores e interpretadores;
-* análise léxica;
-* análise sintática;
-* gramáticas formais;
-* AST;
-* validação semântica;
-* arquitetura de software;
-* Domain-Specific Languages.
+A proposta deste projeto é investigar uma abordagem diferente:
+
+```text
+Fórmula
+   ↓
+DSL
+   ↓
+Análise da linguagem
+   ↓
+Representação do cálculo
+   ↓
+Validação
+   ↓
+Execução
+   ↓
+Resultado
+```
+
+A fórmula passa a ser tratada como **dado e linguagem**, enquanto o sistema fornece a infraestrutura necessária para interpretá-la e executá-la.
 
 ---
 
 # 🎯 Objetivo
 
-Construir um **motor genérico de cálculos baseado em DSL** capaz de receber expressões matemáticas ou físicas, interpretar sua estrutura e executá-las utilizando valores fornecidos em tempo de execução.
+Construir uma DSL capaz de representar diferentes tipos de cálculos utilizando uma sintaxe controlada e independente da linguagem utilizada pela aplicação cliente.
 
-Exemplo simples:
-
-```text
-resultado = (a + b) * c
-```
-
-Com:
+Exemplo conceitual:
 
 ```text
-a = 10
-b = 5
-c = 2
+preco * quantidade
 ```
 
-Resultado:
+ou:
 
 ```text
-resultado = 30
+(valor + taxa) / parcelas
 ```
 
-Entretanto, o objetivo do projeto é evoluir para fórmulas significativamente mais complexas.
+O objetivo não é apenas construir uma calculadora.
 
-Por exemplo:
+O projeto serve como laboratório para estudar conceitos relacionados a:
+
+* Domain-Specific Languages;
+* compiladores e interpretadores;
+* análise léxica;
+* análise sintática;
+* gramáticas formais;
+* Abstract Syntax Tree (AST);
+* validação semântica;
+* avaliação de expressões;
+* arquitetura de software;
+* modelagem de fórmulas;
+* cálculos encadeados;
+* extensibilidade de linguagens.
+
+---
+
+# 💡 Motivação
+
+Sistemas corporativos frequentemente possuem cálculos espalhados por diferentes partes da aplicação.
+
+Esses cálculos podem representar, por exemplo:
+
+* preços;
+* tarifas;
+* taxas;
+* impostos;
+* descontos;
+* rentabilidade;
+* parcelamento;
+* indicadores;
+* regras financeiras;
+* fórmulas matemáticas;
+* fórmulas físicas.
+
+Uma fórmula relativamente simples pode depender de diferentes tipos de informação.
+
+Considere:
 
 ```text
-delta = b^2 - 4 * a * c
-x1 = (-b + sqrt(delta)) / (2 * a)
-x2 = (-b - sqrt(delta)) / (2 * a)
+valorFinal = valorEntrada * taxa + custoOperacional
 ```
 
-Ou fórmulas físicas:
+Nesse cenário:
 
-```text
-velocidadeMedia = distancia / tempo
-```
+* `valorEntrada` pode chegar através de uma requisição;
+* `taxa` pode ser uma configuração persistida;
+* `custoOperacional` pode ser resultado de outro cálculo;
+* `valorFinal` representa o resultado da fórmula.
 
-```text
-forca = massa * aceleracao
-```
+Isso cria a necessidade de diferenciar **a fórmula** dos **valores utilizados durante sua execução**.
 
-```text
-energiaCinetica = (massa * velocidade^2) / 2
-```
-
-```text
-energiaPotencial = massa * gravidade * altura
-```
-
-A DSL deverá permitir que novas fórmulas sejam adicionadas progressivamente sem transformar o motor em um conjunto de implementações específicas para cada cálculo.
+A DSL procura explorar justamente essa separação.
 
 ---
 
 # 🧠 Conceito central
 
-O fluxo principal da DSL será:
+Uma fórmula deve descrever **como um cálculo é realizado**, e não necessariamente de onde cada valor será obtido.
+
+Por exemplo:
 
 ```text
-             Fórmula
-                │
-                ▼
-        ┌───────────────┐
-        │     Lexer     │
-        │     ANTLR     │
-        └───────┬───────┘
-                │
-              Tokens
-                │
-                ▼
-        ┌───────────────┐
-        │    Parser     │
-        │     ANTLR     │
-        └───────┬───────┘
-                │
-          Parse Tree
-                │
-                ▼
-        ┌───────────────┐
-        │  AST Builder  │
-        └───────┬───────┘
-                │
-               AST
-                │
-                ▼
-        ┌───────────────┐
-        │   Validator   │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │ Calculation   │
-        │    Engine     │
-        └───────┬───────┘
-                │
-                ▼
-        ┌───────────────┐
-        │    Result     │
-        └───────────────┘
+base * altura
 ```
 
-De forma resumida:
+A fórmula conhece apenas as variáveis necessárias.
+
+Durante a execução, um contexto fornece seus respectivos valores:
 
 ```text
-Formula
+base = 10
+altura = 5
+```
+
+Produzindo:
+
+```text
+50
+```
+
+Essa separação permite que a mesma fórmula seja executada diversas vezes utilizando diferentes conjuntos de dados.
+
+---
+
+# 🔄 Fluxo conceitual da DSL
+
+O processamento de uma fórmula pode ser representado da seguinte maneira:
+
+```text
+                    ┌──────────────────┐
+                    │     Fórmula      │
+                    │  (texto da DSL)  │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │      Lexer       │
+                    │ análise léxica   │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │      Parser      │
+                    │ análise sintática│
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │       AST        │
+                    │ representação    │
+                    │ da expressão     │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │    Validação     │
+                    │    semântica     │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Motor de Cálculo │
+                    │    execução      │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │    Resultado     │
+                    └──────────────────┘
+```
+
+Cada etapa possui uma responsabilidade diferente dentro do processamento da linguagem.
+
+---
+
+# 🧩 Fórmulas como dados
+
+Um dos conceitos explorados pelo projeto é a possibilidade de armazenar fórmulas independentemente do código da aplicação.
+
+Conceitualmente, uma definição poderia possuir informações como:
+
+```json
+{
+  "nome": "areaRetangulo",
+  "formula": "base * altura"
+}
+```
+
+Os valores necessários para executar a fórmula poderiam ser fornecidos separadamente:
+
+```json
+{
+  "base": 10,
+  "altura": 5
+}
+```
+
+Produzindo:
+
+```json
+{
+  "resultado": 50
+}
+```
+
+O formato definitivo de integração e persistência faz parte da evolução arquitetural do projeto.
+
+---
+
+# 🔢 Tipos de valores
+
+A arquitetura da DSL considera diferentes origens possíveis para os valores utilizados nas fórmulas.
+
+## Valores de entrada
+
+Valores recebidos no momento da execução.
+
+Exemplo:
+
+```text
+valorCompra
+quantidade
+peso
+distancia
+```
+
+---
+
+## Valores configurados
+
+Valores previamente conhecidos pelo sistema.
+
+Exemplo:
+
+```text
+taxa
+percentual
+coeficiente
+limite
+```
+
+---
+
+## Constantes
+
+Valores que representam constantes matemáticas ou físicas.
+
+Exemplos conceituais:
+
+```text
+PI
+E
+GRAVIDADE
+```
+
+---
+
+## Resultados de outros cálculos
+
+Uma fórmula também poderá utilizar o resultado produzido por outra fórmula.
+
+Por exemplo:
+
+```text
+calculoA = base * altura
+
+calculoB = calculoA * fator
+```
+
+Esse modelo abre espaço para a criação de **cálculos encadeados** e, futuramente, estruturas mais complexas de dependência entre fórmulas.
+
+---
+
+# 🔗 Cálculos encadeados
+
+Um dos objetivos de evolução da DSL é permitir que cálculos sejam organizados como dependências.
+
+Exemplo:
+
+```text
+A = x + y
+B = A * taxa
+C = B / quantidade
+```
+
+Conceitualmente:
+
+```text
+x ───┐
+     ├──► A ───► B ───► C
+y ───┘          ▲
+                │
+              taxa
+```
+
+Nesse cenário, o motor precisa compreender a ordem necessária para execução das fórmulas.
+
+Esse conceito permitirá representar processos de cálculo semelhantes aos encontrados em planilhas e sistemas corporativos.
+
+---
+
+# 🧮 Possíveis domínios de aplicação
+
+A DSL foi pensada para evoluir além de operações aritméticas básicas.
+
+## Matemática básica
+
+```text
+a + b
+a - b
+a * b
+a / b
+```
+
+---
+
+## Geometria
+
+Área de um retângulo:
+
+```text
+base * altura
+```
+
+Área de um triângulo:
+
+```text
+(base * altura) / 2
+```
+
+Área de um círculo:
+
+```text
+PI * raio ^ 2
+```
+
+---
+
+## Álgebra
+
+Equações e expressões algébricas poderão utilizar diferentes variáveis e operadores.
+
+Um exemplo de domínio futuro é a resolução de equações quadráticas.
+
+---
+
+## Trigonometria
+
+A evolução da linguagem poderá incorporar funções como:
+
+```text
+sin(angulo)
+cos(angulo)
+tan(angulo)
+```
+
+---
+
+## Física
+
+A mesma estrutura poderá representar fórmulas físicas.
+
+Velocidade média:
+
+```text
+distancia / tempo
+```
+
+Força:
+
+```text
+massa * aceleracao
+```
+
+Energia cinética:
+
+```text
+(massa * velocidade ^ 2) / 2
+```
+
+Esses exemplos representam objetivos de evolução da linguagem e não necessariamente funcionalidades já disponíveis.
+
+---
+
+# 🏗️ Visão arquitetural
+
+Em alto nível, o projeto é dividido em duas grandes responsabilidades:
+
+```text
+┌──────────────────────────────────────────┐
+│              Definição                   │
+│                                          │
+│        Fórmulas escritas na DSL          │
+└────────────────────┬─────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────┐
+│           Formula Engine                 │
+│                                          │
+│ Lexer                                    │
+│ Parser                                   │
+│ AST                                      │
+│ Validator                                │
+│ Evaluator                                │
+└────────────────────┬─────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────┐
+│              Resultado                   │
+└──────────────────────────────────────────┘
+```
+
+O **Formula Engine** é responsável por compreender e executar a linguagem.
+
+Aplicações externas não precisam conhecer os detalhes internos da interpretação da fórmula.
+
+---
+
+# 🧱 Estrutura do repositório
+
+O projeto procura separar documentação conceitual da implementação do motor.
+
+```text
+dsl-calculos/
+│
+├── README.md
+│
+├── ideacao/
+│   └── documentação conceitual
+│
+└── formula-engine/
+    └── implementação do motor da DSL
+```
+
+### `README.md`
+
+Apresenta a visão geral, motivação, objetivos e direção arquitetural do projeto.
+
+### `ideacao/`
+
+Contém estudos, decisões, hipóteses e propostas relacionadas à evolução da DSL.
+
+Os documentos dessa área representam **concepção e arquitetura**, não necessariamente funcionalidades existentes.
+
+### `formula-engine/`
+
+Contém a implementação do motor responsável pelo processamento da linguagem.
+
+A documentação específica dessa implementação deve permanecer junto ao próprio módulo.
+
+---
+
+# 🛠️ Tecnologias
+
+O projeto utiliza principalmente:
+
+* **Kotlin** — implementação do motor;
+* **ANTLR** — definição e processamento da gramática;
+* **Gradle** — build e gerenciamento do projeto;
+* **JUnit** — testes automatizados.
+
+Outras tecnologias poderão ser incorporadas conforme a arquitetura evoluir.
+
+---
+
+# 📚 Conceitos estudados
+
+O desenvolvimento deste projeto envolve o estudo de diferentes áreas da Engenharia de Software e Ciência da Computação.
+
+### Linguagens
+
+```text
+Gramática
    ↓
 Lexer
    ↓
@@ -156,1015 +506,143 @@ Parser
 Parse Tree
    ↓
 AST
-   ↓
-Semantic Validation
-   ↓
-Variable Resolution
-   ↓
-Calculation Engine
-   ↓
-Result
 ```
 
----
-
-# 🏗️ Arquitetura inicial
-
-Uma possível organização do projeto:
+### Execução
 
 ```text
-dsl-calculations/
-│
-├── README.md
-├── build.gradle.kts
-├── settings.gradle.kts
-│
-├── docs/
-│   ├── architecture/
-│   ├── grammar/
-│   ├── examples/
-│   └── decisions/
-│
-└── src/
-    ├── main/
-    │   ├── antlr/
-    │   │   └── Calculation.g4
-    │   │
-    │   └── kotlin/
-    │       └── dsl/
-    │           ├── lexer/
-    │           ├── parser/
-    │           ├── ast/
-    │           ├── validator/
-    │           ├── engine/
-    │           ├── context/
-    │           ├── function/
-    │           ├── result/
-    │           └── exception/
-    │
-    └── test/
-        └── kotlin/
-            └── dsl/
-                ├── parser/
-                ├── ast/
-                ├── validator/
-                └── engine/
-```
-
-A estrutura deverá evoluir conforme novas necessidades forem descobertas durante o desenvolvimento.
-
----
-
-# 🔤 Gramática
-
-A gramática será definida utilizando **ANTLR**.
-
-Exemplo inicial simplificado:
-
-```antlr
-grammar Calculation;
-
-expression
-    : expression '^' expression
-    | expression ('*' | '/') expression
-    | expression ('+' | '-') expression
-    | function
-    | NUMBER
-    | IDENTIFIER
-    | '(' expression ')'
-    ;
-
-function
-    : IDENTIFIER '(' expression ')'
-    ;
-
-NUMBER
-    : [0-9]+ ('.' [0-9]+)?
-    ;
-
-IDENTIFIER
-    : [a-zA-Z_][a-zA-Z0-9_]*
-    ;
-
-WS
-    : [ \t\r\n]+ -> skip
-    ;
-```
-
-Esta gramática é apenas o ponto de partida.
-
-Ela deverá evoluir para suportar:
-
-* precedência de operadores;
-* associatividade;
-* operadores unários;
-* potência;
-* funções matemáticas;
-* constantes;
-* múltiplas expressões;
-* atribuições;
-* tipos;
-* validações;
-* unidades físicas.
-
----
-
-# 🌳 Abstract Syntax Tree — AST
-
-Após o parsing, a árvore gerada pelo ANTLR não será utilizada diretamente pelo domínio.
-
-O projeto deverá possuir sua própria representação de AST.
-
-Exemplo conceitual:
-
-```kotlin
-sealed interface Expression
-```
-
-Implementações possíveis:
-
-```text
-Expression
-│
-├── LiteralExpression
-├── VariableExpression
-├── BinaryExpression
-├── UnaryExpression
-├── FunctionExpression
-└── AssignmentExpression
-```
-
-Uma expressão como:
-
-```text
-(a + b) * c
-```
-
-poderá resultar conceitualmente em:
-
-```text
-        *
-       / \
-      +   c
-     / \
-    a   b
-```
-
-Isso mantém o domínio independente das estruturas internas geradas pelo ANTLR.
-
----
-
-# 🔎 Validação
-
-Antes da execução, as fórmulas deverão passar por validações.
-
-Existirão pelo menos dois níveis.
-
-## Validação sintática
-
-Responsabilidade principalmente do parser.
-
-Exemplo inválido:
-
-```text
-10 + * 20
-```
-
-## Validação semântica
-
-A expressão pode estar sintaticamente correta, mas semanticamente inválida.
-
-Exemplo:
-
-```text
-resultado = massa * variavelInexistente
-```
-
-Possíveis validações:
-
-* variável não definida;
-* função inexistente;
-* quantidade incorreta de argumentos;
-* tipos incompatíveis;
-* divisão por zero;
-* dependência circular;
-* constantes inválidas;
-* domínio inválido de função.
-
-Exemplo:
-
-```text
-sqrt(-10)
-```
-
-Dependendo das regras configuradas para o domínio numérico, essa expressão poderá gerar um erro semântico.
-
----
-
-# ⚙️ Motor de execução
-
-O `CalculationEngine` será responsável por avaliar a AST.
-
-Exemplo:
-
-```text
-massa = 10
-aceleracao = 5
-```
-
-Fórmula:
-
-```text
-forca = massa * aceleracao
-```
-
-Execução conceitual:
-
-```text
-Variable(massa)
-        ↓
-       10
-
-Variable(aceleracao)
-        ↓
-        5
-
-BinaryExpression(*)
-        ↓
-     10 * 5
-        ↓
-       50
-```
-
-Resultado:
-
-```json
-{
-  "variable": "forca",
-  "value": 50
-}
-```
-
----
-
-# 📦 Contexto de execução
-
-As fórmulas não deverão conhecer diretamente banco de dados, APIs ou interfaces externas.
-
-O motor receberá um contexto contendo os valores necessários para execução.
-
-Exemplo:
-
-```json
-{
-  "variables": {
-    "massa": 10,
-    "aceleracao": 9.81
-  }
-}
-```
-
-Fórmula:
-
-```text
-forca = massa * aceleracao
-```
-
-Resultado:
-
-```json
-{
-  "result": {
-    "forca": 98.1
-  }
-}
-```
-
-Isso permite que os valores tenham diferentes origens:
-
-```text
-HTTP Request
-Database
-Configuration
-External API
-Previous Calculation
-        │
-        ▼
-Execution Context
-        │
-        ▼
-Calculation Engine
-```
-
----
-
-# 🔗 Cálculos encadeados
-
-Um dos objetivos importantes da DSL é permitir cálculos dependentes de resultados anteriores.
-
-Exemplo:
-
-```text
-delta = b^2 - 4 * a * c
-x1 = (-b + sqrt(delta)) / (2 * a)
-x2 = (-b - sqrt(delta)) / (2 * a)
-```
-
-Nesse caso existe um grafo de dependências:
-
-```text
-a ─────┐
-b ─────┼────► delta
-c ─────┘        │
-                ├────► x1
-                │
-                └────► x2
-```
-
-O motor deverá identificar essas dependências e determinar a ordem correta de execução.
-
-Também deverá detectar dependências circulares.
-
-Exemplo inválido:
-
-```text
-a = b + 1
-b = a + 1
-```
-
----
-
-# 🧮 Operações matemáticas
-
-A primeira evolução da DSL deverá oferecer suporte aos operadores fundamentais:
-
-```text
-+
--
-*
-/
-%
-^
-```
-
-Também deverão ser suportadas funções matemáticas como:
-
-```text
-sqrt(x)
-abs(x)
-pow(x, y)
-min(x, y)
-max(x, y)
-round(x)
-```
-
-Posteriormente:
-
-```text
-sin(x)
-cos(x)
-tan(x)
-log(x)
-ln(x)
-exp(x)
-```
-
----
-
-# 🔢 Constantes
-
-A linguagem poderá possuir constantes matemáticas e físicas.
-
-Exemplos matemáticos:
-
-```text
-PI
-E
-```
-
-Exemplos físicos:
-
-```text
-GRAVITY
-SPEED_OF_LIGHT
-```
-
-Exemplo:
-
-```text
-circunferencia = 2 * PI * raio
-```
-
----
-
-# 🔬 Fórmulas físicas
-
-A arquitetura deverá permitir representar diferentes categorias de cálculos físicos.
-
-## Cinemática
-
-```text
-velocidadeMedia = distancia / tempo
-```
-
-```text
-movimentoUniforme = posicaoInicial + velocidade * tempo
-```
-
-## Dinâmica
-
-```text
-forca = massa * aceleracao
-```
-
-## Energia
-
-```text
-energiaCinetica = massa * velocidade^2 / 2
-```
-
-```text
-energiaPotencial = massa * gravidade * altura
-```
-
-## Eletricidade
-
-```text
-tensao = resistencia * corrente
-```
-
-## Densidade
-
-```text
-densidade = massa / volume
-```
-
-A intenção não é implementar cada equação como código Kotlin.
-
-As fórmulas deverão ser representadas, sempre que possível, **pela própria DSL**.
-
----
-
-# 📐 Unidades de medida
-
-Uma evolução importante do projeto será adicionar suporte a grandezas e unidades.
-
-Exemplo:
-
-```text
-massa = 10 kg
-aceleracao = 9.81 m/s^2
-
-forca = massa * aceleracao
-```
-
-Resultado esperado:
-
-```text
-98.1 N
-```
-
-Isso exigirá futuramente conceitos como:
-
-```text
-Value
-│
-├── NumericValue
-│
-└── Quantity
-     ├── value
-     ├── unit
-     └── dimension
-```
-
-O motor poderá validar operações dimensionalmente incompatíveis.
-
-Por exemplo:
-
-```text
-10 kg + 20 m
-```
-
-deverá ser rejeitado.
-
----
-
-# 📚 Biblioteca de fórmulas
-
-No futuro, fórmulas poderão ser organizadas em bibliotecas.
-
-Exemplo:
-
-```text
-formulas/
-│
-├── mathematics/
-│   ├── arithmetic
-│   ├── algebra
-│   ├── geometry
-│   └── trigonometry
-│
-└── physics/
-    ├── mechanics
-    ├── kinematics
-    ├── dynamics
-    ├── thermodynamics
-    └── electricity
-```
-
-Isso permitirá reutilizar o mesmo motor para diferentes domínios.
-
----
-
-# 🧩 Exemplo completo
-
-Entrada:
-
-```json
-{
-  "formula": "energiaCinetica = massa * velocidade^2 / 2",
-  "variables": {
-    "massa": 80,
-    "velocidade": 10
-  }
-}
-```
-
-Processamento:
-
-```text
-JSON
- │
- ▼
-Formula
- │
- ▼
-ANTLR Lexer
- │
- ▼
-ANTLR Parser
- │
- ▼
-Parse Tree
- │
- ▼
-AST Builder
- │
- ▼
 AST
- │
- ▼
-Semantic Validator
- │
- ▼
-Variable Resolver
- │
- ▼
-Calculation Engine
- │
- ▼
-Result
+ ↓
+Validação
+ ↓
+Contexto de variáveis
+ ↓
+Avaliação
+ ↓
+Resultado
 ```
 
-Resultado:
+### Arquitetura
 
-```json
-{
-  "formula": "energiaCinetica",
-  "value": 4000
-}
-```
+O projeto também permite explorar:
+
+* separação de responsabilidades;
+* modelagem de domínio;
+* representação intermediária;
+* tratamento de erros;
+* extensibilidade;
+* versionamento de linguagem;
+* compatibilidade de fórmulas;
+* dependência entre cálculos;
+* testes de linguagens;
+* evolução arquitetural.
 
 ---
 
-# 🧱 Separação de responsabilidades
+# 🗺️ Evolução planejada
 
-## Grammar
-
-Define **como a linguagem pode ser escrita**.
+A DSL deverá evoluir incrementalmente.
 
 ```text
-Calculation.g4
+Operações aritméticas
+        ↓
+Precedência de operadores
+        ↓
+Variáveis
+        ↓
+Operadores adicionais
+        ↓
+Funções matemáticas
+        ↓
+Constantes
+        ↓
+Validação semântica
+        ↓
+Fórmulas persistidas
+        ↓
+Cálculos encadeados
+        ↓
+Funções matemáticas avançadas
+        ↓
+Fórmulas físicas
+        ↓
+Unidades de medida
 ```
 
-## Lexer
-
-Transforma caracteres em tokens.
-
-```text
-"10 + massa"
-```
-
-torna-se conceitualmente:
-
-```text
-NUMBER(10)
-PLUS
-IDENTIFIER(massa)
-```
-
-## Parser
-
-Valida a estrutura sintática e produz a Parse Tree.
-
-## AST Builder
-
-Converte estruturas do ANTLR para objetos pertencentes ao domínio da DSL.
-
-## Validator
-
-Executa validações semânticas.
-
-## Context
-
-Mantém variáveis, constantes e demais valores necessários para uma execução.
-
-## Engine
-
-Percorre a AST e realiza os cálculos.
-
-## Function Registry
-
-Mantém as funções disponíveis na linguagem.
-
-Exemplo:
-
-```text
-sqrt
-sin
-cos
-pow
-abs
-```
-
-## Result
-
-Representa o resultado da execução de forma independente da interface externa.
+Cada funcionalidade deverá ser incorporada à linguagem somente após a definição de sua semântica e dos respectivos testes.
 
 ---
 
-# 🏛️ Princípios arquiteturais
+# 🔬 Projeto de estudo
 
-O projeto seguirá alguns princípios importantes.
+Este repositório também possui um objetivo educacional.
 
-### Independência do ANTLR
+A intenção é construir a DSL incrementalmente para compreender, na prática, como uma linguagem é criada.
 
-ANTLR será utilizado para parsing, mas não deverá contaminar todo o domínio.
-
-```text
-ANTLR
-  │
-  ▼
-Adapter / AST Builder
-  │
-  ▼
-Domain AST
-```
-
-### Motor independente de transporte
-
-O motor não deverá depender de:
+Em vez de utilizar apenas bibliotecas prontas para avaliação de expressões, o projeto procura explorar explicitamente conceitos como:
 
 ```text
-REST
-HTTP
-JSON
-Database
-Angular
-Spring
+texto
+  ↓
+tokens
+  ↓
+gramática
+  ↓
+parse tree
+  ↓
+AST
+  ↓
+validação
+  ↓
+interpretação
+  ↓
+resultado
 ```
 
-Essas tecnologias poderão consumir o motor, mas não definir seu funcionamento.
-
-### Fórmulas como dados
-
-Sempre que possível:
-
-```text
-Formula != Kotlin Code
-```
-
-A fórmula deve ser armazenável, versionável, validável e executável pela DSL.
-
-### Extensibilidade
-
-Adicionar uma nova fórmula idealmente não deverá exigir alterações no núcleo do motor.
+Dessa forma, cada evolução da DSL representa também uma evolução no estudo de linguagens, compiladores e arquitetura de software.
 
 ---
 
-# 🧪 Estratégia de testes
+# 📖 Referências de estudo
 
-O projeto deverá possuir testes em diferentes níveis.
+Algumas das principais referências conceituais utilizadas no estudo deste projeto são:
 
-## Grammar Tests
+* Terence Parr — *The Definitive ANTLR 4 Reference*
+* Terence Parr — *Language Implementation Patterns*
+* Martin Fowler — *Domain-Specific Languages*
+* Alfred V. Aho, Monica S. Lam, Ravi Sethi e Jeffrey D. Ullman — *Compilers: Principles, Techniques, and Tools*
 
-```text
-"1 + 2"
-"a * b"
-"(a + b) * c"
-```
-
-## Parser Tests
-
-Verificar se expressões válidas e inválidas são reconhecidas corretamente.
-
-## AST Tests
-
-```text
-1 + 2 * 3
-```
-
-deve respeitar precedência:
-
-```text
-    +
-   / \
-  1   *
-     / \
-    2   3
-```
-
-## Validator Tests
-
-Testar:
-
-* variáveis inexistentes;
-* funções inexistentes;
-* argumentos inválidos;
-* dependências circulares;
-* tipos incompatíveis.
-
-## Engine Tests
-
-```text
-2 + 2 = 4
-```
-
-```text
-2 + 3 * 4 = 14
-```
-
-```text
-(2 + 3) * 4 = 20
-```
-
-## Formula Tests
-
-Exemplo:
-
-```text
-massa = 80
-velocidade = 10
-
-energiaCinetica = massa * velocidade^2 / 2
-```
-
-Resultado:
-
-```text
-4000
-```
+Essas referências ajudam a fundamentar os conceitos de gramáticas, parsing, representação de linguagens, DSLs e construção de interpretadores.
 
 ---
 
-# 🗺️ Roadmap
+# 🚧 Status
 
-## Fase 1 — Calculadora básica
+O projeto está em desenvolvimento e aprendizado contínuo.
 
-* [ ] Criar projeto Kotlin
-* [ ] Configurar ANTLR
-* [ ] Criar gramática inicial
-* [ ] Implementar soma
-* [ ] Implementar subtração
-* [ ] Implementar multiplicação
-* [ ] Implementar divisão
-* [ ] Implementar parênteses
-* [ ] Implementar precedência
+A linguagem será expandida gradualmente, priorizando:
 
-## Fase 2 — AST
+1. sintaxe bem definida;
+2. comportamento previsível;
+3. validação;
+4. testes automatizados;
+5. separação entre linguagem e infraestrutura;
+6. documentação das decisões arquiteturais.
 
-* [ ] Criar modelo da AST
-* [ ] Criar AST Builder
-* [ ] Remover dependência direta da Parse Tree no domínio
-* [ ] Criar Visitor/Evaluator
+Funcionalidades apresentadas neste README como exemplos de matemática avançada, física, funções, constantes ou cálculos encadeados podem representar **objetivos futuros**, e não necessariamente funcionalidades disponíveis na versão atual.
 
-## Fase 3 — Variáveis
-
-* [ ] Implementar identificadores
-* [ ] Implementar atribuições
-* [ ] Criar Execution Context
-* [ ] Criar Variable Resolver
-* [ ] Suportar resultados intermediários
-
-## Fase 4 — Funções matemáticas
-
-* [ ] `sqrt`
-* [ ] `pow`
-* [ ] `abs`
-* [ ] `min`
-* [ ] `max`
-* [ ] `sin`
-* [ ] `cos`
-* [ ] `tan`
-* [ ] `log`
-
-## Fase 5 — Validação semântica
-
-* [ ] Variáveis inexistentes
-* [ ] Funções inexistentes
-* [ ] Quantidade de argumentos
-* [ ] Divisão por zero
-* [ ] Dependências circulares
-* [ ] Domínio das funções
-
-## Fase 6 — Fórmulas encadeadas
-
-* [ ] Criar grafo de dependências
-* [ ] Ordenação das fórmulas
-* [ ] Resultados intermediários
-* [ ] Detecção de ciclos
-
-## Fase 7 — Física
-
-* [ ] Constantes físicas
-* [ ] Grandezas
-* [ ] Unidades
-* [ ] Dimensões
-* [ ] Conversão de unidades
-* [ ] Validação dimensional
-
-## Fase 8 — Biblioteca de fórmulas
-
-* [ ] Matemática
-* [ ] Álgebra
-* [ ] Geometria
-* [ ] Trigonometria
-* [ ] Cinemática
-* [ ] Dinâmica
-* [ ] Energia
-* [ ] Eletricidade
-
-## Fase 9 — Persistência e API
-
-* [ ] Representação JSON das fórmulas
-* [ ] Versionamento
-* [ ] Persistência
-* [ ] API para validação
-* [ ] API para execução
+Para verificar o comportamento atualmente implementado, consulte a documentação do **Formula Engine** e seus respectivos testes.
 
 ---
 
-# 🚀 Visão futura
+# 👨‍💻 Autor
 
-A arquitetura poderá evoluir para algo semelhante a:
+**Luiz Leme**
 
-```text
-             ┌─────────────────┐
-             │ Formula Editor  │
-             │     Angular     │
-             └────────┬────────┘
-                      │
-                     JSON
-                      │
-                      ▼
-             ┌─────────────────┐
-             │   Formula API   │
-             └────────┬────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │   DSL Compiler  │
-             │                 │
-             │ Lexer           │
-             │ Parser          │
-             │ AST Builder     │
-             │ Validator       │
-             └────────┬────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │ Calculation     │
-             │ Engine          │
-             └────────┬────────┘
-                      │
-             ┌────────┴────────┐
-             ▼                 ▼
-       Formula Store        Result
-```
+Projeto desenvolvido para estudo e experimentação em:
 
-A interface poderá permitir futuramente a construção visual das fórmulas, enquanto o backend permanece responsável pela validação e execução.
+**Kotlin • ANTLR • DSL • Compiladores • Interpretadores • AST • Arquitetura de Software**
 
 ---
 
-# 🛠️ Tecnologias
-
-Inicialmente:
-
-* **Kotlin**
-* **ANTLR 4**
-* **Gradle Kotlin DSL**
-* **JUnit 5**
-* **Git**
-
-Possíveis tecnologias futuras:
-
-* Spring Boot
-* PostgreSQL
-* Angular
-* Docker
-* Testcontainers
-
-Essas tecnologias não fazem parte obrigatoriamente do núcleo da DSL.
-
----
-
-# 📖 Conceitos estudados
-
-Este projeto também será utilizado como laboratório para estudo de:
-
-```text
-Compiler Design
-Domain-Specific Languages
-Formal Grammars
-Lexer
-Parser
-Parse Tree
-Abstract Syntax Tree
-Visitor Pattern
-Interpreter Pattern
-Semantic Analysis
-Symbol Tables
-Dependency Graphs
-Type Systems
-Dimensional Analysis
-Language Engineering
-Software Architecture
-```
-
----
-
-# 📚 Referências de estudo
-
-O desenvolvimento será apoiado principalmente em literatura sobre construção de linguagens e DSLs.
-
-### Terence Parr
-
-**The Definitive ANTLR 4 Reference**
-
-Referência principal para ANTLR, gramáticas, parsers, listeners e visitors.
-
-### Terence Parr
-
-**Language Implementation Patterns**
-
-Aborda padrões utilizados na implementação de linguagens, interpretadores e tradutores.
-
-### Martin Fowler
-
-**Domain-Specific Languages**
-
-Referência importante para compreender DSLs internas e externas, parsers, modelos semânticos e estratégias de implementação.
-
----
-
-# 💡 Filosofia do projeto
-
-Este repositório não pretende apenas responder:
-
-> "Como calcular uma fórmula?"
-
-A pergunta principal é:
-
-> **"Como projetar uma linguagem capaz de representar, validar e executar diferentes tipos de cálculos?"**
-
-Por isso, o projeto começa pequeno:
-
-```text
-1 + 2
-```
-
-e deverá evoluir progressivamente para:
-
-```text
-DSL
- │
- ├── Grammar
- ├── Parser
- ├── AST
- ├── Semantic Model
- ├── Validation
- ├── Functions
- ├── Variables
- ├── Dependency Graph
- ├── Calculation Engine
- ├── Mathematical Formulas
- └── Physical Formulas
-```
-
-O objetivo final é possuir um **motor extensível de fórmulas matemáticas e físicas**, no qual a linguagem descreve **o que deve ser calculado**, enquanto o motor determina **como interpretar, validar e executar o cálculo**.
-
----
-
-## 📄 Licença
-
-Projeto desenvolvido inicialmente para fins de estudo, experimentação e evolução de conhecimentos em engenharia de software, construção de linguagens, compiladores, Kotlin e ANTLR.
+> **Uma fórmula deixa de ser apenas código quando passa a fazer parte de uma linguagem.**
