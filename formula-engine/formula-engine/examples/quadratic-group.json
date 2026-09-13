@@ -1,0 +1,66 @@
+{
+  "id": "quadratic",
+  "variables": [
+    {
+      "name": "two",
+      "source": "CONSTANT",
+      "type": "INTEGER",
+      "value": "2"
+    },
+    {
+      "name": "four",
+      "source": "CONSTANT",
+      "type": "INTEGER",
+      "value": "4"
+    },
+    {
+      "name": "a",
+      "source": "INPUT",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "b",
+      "source": "INPUT",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "c",
+      "source": "INPUT",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "delta",
+      "source": "CALCULATED",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "x1",
+      "source": "CALCULATED",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "x2",
+      "source": "CALCULATED",
+      "type": "DECIMAL"
+    }
+  ],
+  "formulas": [
+    {
+      "name": "calculate-delta",
+      "expression": "delta = b ^ 2 - four * a * c"
+    },
+    {
+      "name": "calculate-x1",
+      "expression": "x1 = (-b + sqrt(delta)) / (two * a)"
+    },
+    {
+      "name": "calculate-x2",
+      "expression": "x2 = (-b - sqrt(delta)) / (two * a)"
+    }
+  ],
+  "outputs": [
+    "delta",
+    "x1",
+    "x2"
+  ]
+}

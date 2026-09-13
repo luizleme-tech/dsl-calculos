@@ -1,0 +1,30 @@
+{
+  "id": "circle-area",
+  "variables": [
+    {
+      "name": "pi",
+      "source": "CONSTANT",
+      "type": "DECIMAL",
+      "value": "3.14"
+    },
+    {
+      "name": "r",
+      "source": "INPUT",
+      "type": "DECIMAL"
+    },
+    {
+      "name": "area",
+      "source": "CALCULATED",
+      "type": "DECIMAL"
+    }
+  ],
+  "formulas": [
+    {
+      "name": "calculate-area",
+      "expression": "area = pi * r ^ 2"
+    }
+  ],
+  "outputs": [
+    "area"
+  ]
+}
